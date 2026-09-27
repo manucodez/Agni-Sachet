@@ -1,0 +1,84 @@
+/* Design tokens — an instrument-panel dark theme, not a generic SaaS
+   card kit: this is a live-ops monitoring tool, so the palette reads as
+   telemetry (amber/orange risk signal against a near-black field) rather
+   than a marketing surface. See docs/ARCHITECTURE.md if you're extending
+   the palette — keep new colors inside this token block. */
+:root {
+  --bg-void: #0b0d10;
+  --bg-panel: #14171b;
+  --bg-panel-raised: #1b1f24;
+  --border-hairline: #262b31;
+
+  --text-primary: #e7e4dd;
+  --text-muted: #8b9198;
+
+  --signal-amber: #e8a33d;
+
+  --tier-l0: #5c7a63;
+  --tier-l1: #d9a441;
+  --tier-l2: #e07b39;
+  --tier-l3: #c9433e;
+
+  --class-industrial-fire: #c9433e;
+  --class-gas-flare: #d9a441;
+  --class-mining: #7d7266;
+  --class-agricultural-burn: #7fa15a;
+  --class-wildfire: #b3542f;
+  --class-other: #5c6672;
+  --class-unclassified: #8b6fb0;
+
+  --edge-physical: #4a5a6a;
+  --edge-wind: #6aa3b3;
+
+  --font-body: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-data: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-void);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--signal-amber);
+  color: var(--bg-void);
+}
+
+/* visible keyboard focus everywhere, deliberately not removed */
+:focus-visible {
+  outline: 2px solid var(--signal-amber);
+  outline-offset: 2px;
+}
+
+.leaflet-container {
+  background: var(--bg-void) !important;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--bg-panel-raised);
+  color: var(--text-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

@@ -1,0 +1,8 @@
+# Install with: pip install -r backend/requirements-advanced.txt
+# Only needed for Phase 3 (chemical fingerprint, SAR confirmation, GFM novelty).
+# Kept separate because torch + transformers add ~3-4 GB and slow down the
+# core-MVP setup path for anyone who just wants Phases 0-2 running.
+torch==2.4.1
+transformers==4.45.1
+earthengine-api==1.1.2
+sentinelhub==3.10.2

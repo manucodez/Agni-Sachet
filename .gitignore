@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+*.duckdb
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Data (never commit raw pulls or model weights)
+data/raw/
+data/interim/
+data/processed/
+*.tif
+*.tiff
+*.geojson.bak
+models/*.joblib
+models/*.pt
+models/*.onnx
+!models/.gitkeep
+
+# Node / frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env*.local
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Alembic — the initial schema migration IS committed on purpose (it has
+# hand-fixed PostGIS/GeoAlchemy2 quirks baked in, see its own docstring);
+# only ignore migrations generated locally after that.
+backend/migrations/versions/*.py
+!backend/migrations/versions/.gitkeep
+!backend/migrations/versions/d0796c9c8706_initial_schema.py
+# Also hand-written (best-practices merge, docs/MERGE_NOTES.md) — same
+# reasoning as the initial migration above.
+!backend/migrations/versions/a3f7c1d92e6b_add_incidents_and_responders.py
+
+# Logs
+*.log
