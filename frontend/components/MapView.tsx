@@ -72,11 +72,11 @@ export default function MapView({
   const selectedConnections = selectedClusterId !== null ? connections[selectedClusterId] ?? [] : [];
 
   return (
-    <MapContainer center={INDIA_CENTER} zoom={INDIA_ZOOM} style={{ height: "100vh", width: "100%" }}>
+    <MapContainer key="main-map" center={INDIA_CENTER} zoom={INDIA_ZOOM} style={{ height: "100vh", width: "100%" }}>
       <TileLayer
         // CARTO's dark basemap — matches the instrument-panel theme instead
         // of default OSM light tiles fighting the rest of the UI.
-        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
       />
       <FlyToSelected clusters={clusters} selectedClusterId={selectedClusterId} />

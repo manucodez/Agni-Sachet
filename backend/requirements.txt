@@ -11,7 +11,7 @@ psycopg[binary]==3.2.2
 alembic==1.13.3
 shapely==2.0.6
 geopandas==1.0.1
-rasterio==1.3.11
+rasterio==1.4.4
 pyproj==3.6.1
 
 # --- Data ingestion ------------------------------------------------------------
