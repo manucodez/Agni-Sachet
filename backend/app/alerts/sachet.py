@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import requests
 
@@ -45,7 +45,7 @@ def build_sachet_payload(
     return {
         "identifier": str(uuid.uuid4()),
         "sender": "agni-sachet@team-neuron",
-        "sent": datetime.now(timezone.utc).isoformat(),
+        "sent": datetime.now(UTC).isoformat(),
         "status": "Actual",
         "msgType": "Alert",
         "scope": "Restricted",

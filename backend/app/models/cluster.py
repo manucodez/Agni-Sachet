@@ -7,7 +7,6 @@ This is the row a judge or analyst actually looks at: "this specific
 facility, classified as X, with this risk score."
 """
 from datetime import datetime
-from typing import Optional
 
 from geoalchemy2 import Geometry
 from sqlalchemy import DateTime, Float, Integer, String
@@ -31,9 +30,9 @@ class DiscoveredCluster(Base):
 
     # --- classification (Step 7) ---
     # industrial_fire | gas_flare | mining | agricultural_burn | wildfire | other | unclassified
-    predicted_class: Mapped[Optional[str]] = mapped_column(String(32), nullable=True, index=True)
-    classification_confidence: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    top_reasons_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)  # JSON-encoded SHAP top-3
+    predicted_class: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
+    classification_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    top_reasons_json: Mapped[str | None] = mapped_column(String, nullable=True)  # JSON-encoded SHAP top-3
 
     # Set only when app/ml/serving_guards.py overrides the raw model output
     # (e.g. "reclassified other -> wildfire: dense forest cover, no
@@ -41,21 +40,28 @@ class DiscoveredCluster(Base):
     # what the classifier predicted. This is deliberately visible on the
     # row (and surfaced in the API/alert payload) rather than silently
     # swapping the label — see docs/ARCHITECTURE.md "Serving guards".
-    classification_override_note: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    classification_override_note: Mapped[str | None] = mapped_column(String, nullable=True)
 
     # --- advanced evidence fusion (Phase 3) — nullable, filled only when run ---
-    chem_fingerprint_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    sar_structural_change_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    gfm_novelty_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    chem_fingerprint_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    sar_structural_change_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    gfm_novelty_score: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     # --- graph (Step 4) ---
-    centrality_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    centrality_score: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     # --- risk (Step 8) ---
-    risk_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)  # 0-100
-    risk_tier: Mapped[Optional[str]] = mapped_column(String(4), nullable=True)  # L0 | L1 | L2 | L3
+    risk_score: Mapped[float | None] = mapped_column(Float, nullable=True)  # 0-100
+    risk_tier: Mapped[str | None] = mapped_column(String(4), nullable=True)  # L0 | L1 | L2 | L3
 
-    hotspots: Mapped[list["Hotspot"]] = relationship(back_populates="cluster")
+    # "Hotspot" as a string here is a forward reference to the model in
+    # app/models/hotspot.py, resolved by SQLAlchemy at mapper-configuration
+    # time (after both model modules have been imported via
+    # app/models/__init__.py) — not a name ruff's static analysis can see,
+    # hence the noqa. This is the standard SQLAlchemy 2.0 pattern for a
+    # relationship between two models that would otherwise need a circular
+    # import.
+    hotspots: Mapped[list["Hotspot"]] = relationship(back_populates="cluster")  # noqa: F821
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<Cluster {self.cluster_id} {self.predicted_class} risk={self.risk_score}>"

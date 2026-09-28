@@ -26,7 +26,6 @@ column then, following the Hotspot/DiscoveredCluster pattern.
 """
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -62,15 +61,15 @@ class Incident(Base):
     risk_tier: Mapped[str] = mapped_column(String(4), nullable=False)
     centroid_lat: Mapped[float] = mapped_column(Float, nullable=False)
     centroid_lon: Mapped[float] = mapped_column(Float, nullable=False)
-    nearest_responder_distance_m: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    nearest_responder_type: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
-    nearest_responder_name: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    nearest_responder_distance_m: Mapped[float | None] = mapped_column(Float, nullable=True)
+    nearest_responder_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    nearest_responder_name: Mapped[str | None] = mapped_column(String(256), nullable=True)
 
     current_tier: Mapped[int] = mapped_column(Integer, nullable=False, default=0)  # 0, 1, 2
     status: Mapped[str] = mapped_column(String(16), nullable=False, default=STATUS_OPEN)
 
-    acknowledged_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
-    acknowledged_by: Mapped[Optional[str]] = mapped_column(String(256), nullable=True)
+    acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    acknowledged_by: Mapped[str | None] = mapped_column(String(256), nullable=True)
 
     # Unguessable token embedded in the tier-email "acknowledge" link
     # (see app/alerts/email_channel.py) — a UUID4 hex string, not a
@@ -81,7 +80,7 @@ class Incident(Base):
     # dicts — one entry per dispatch attempt, success or failure. This is
     # the audit trail for "did Tier 2 actually get notified, and when" —
     # see app/alerts/incident_dispatch.py's DispatchStatus.
-    dispatch_log_json: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    dispatch_log_json: Mapped[str | None] = mapped_column(String, nullable=True)
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<Incident {self.id} cluster={self.cluster_id} tier={self.current_tier} status={self.status}>"

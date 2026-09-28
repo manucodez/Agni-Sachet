@@ -1,4 +1,3 @@
-from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
@@ -13,7 +12,7 @@ router = APIRouter()
 
 @router.get("", response_model=list[AlertOut])
 def list_alerts(
-    severity: Optional[str] = Query(None, description="L0 | L1 | L2 | L3"),
+    severity: str | None = Query(None, description="L0 | L1 | L2 | L3"),
     limit: int = Query(100, le=1000),
     db: Session = Depends(get_db),
 ) -> list[Alert]:

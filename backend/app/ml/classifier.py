@@ -83,7 +83,14 @@ class FireClassifier:
             predicted_class=predicted_class,
             confidence=round(confidence, 4),
             top_reasons=top_reasons,
-            raw_probabilities={c: round(float(p), 4) for c, p in zip(CLASSES, proba)},
+            # strict=True: proba is the model's raw per-class probability
+            # output and CLASSES is the fixed 6-class taxonomy it was
+            # trained on — these must always be the same length; if a
+            # model artifact were ever loaded with a different number of
+            # output classes than CLASSES expects, that's a real
+            # model/config mismatch that should fail loudly here, not
+            # silently zip-truncate and mislabel probabilities.
+            raw_probabilities={c: round(float(p), 4) for c, p in zip(CLASSES, proba, strict=True)},
         )
 
     def apply_evidence_fusion(

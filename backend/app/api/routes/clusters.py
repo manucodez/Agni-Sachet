@@ -8,7 +8,6 @@ GET /clusters/{id}                   -> single cluster detail
 GET /clusters/{id}/history            -> per-sensor FRP/brightness time series
 GET /clusters/{id}/connections        -> graph edges (physical + wind), both directions
 """
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import or_, select
@@ -25,9 +24,9 @@ router = APIRouter()
 
 @router.get("", response_model=list[ClusterOut])
 def list_clusters(
-    predicted_class: Optional[str] = Query(None),
-    min_risk: Optional[float] = Query(None, ge=0, le=100),
-    risk_tier: Optional[str] = Query(None, description="L0 | L1 | L2 | L3"),
+    predicted_class: str | None = Query(None),
+    min_risk: float | None = Query(None, ge=0, le=100),
+    risk_tier: str | None = Query(None, description="L0 | L1 | L2 | L3"),
     db: Session = Depends(get_db),
 ) -> list[DiscoveredCluster]:
     stmt = select(DiscoveredCluster)
@@ -42,8 +41,8 @@ def list_clusters(
 
 @router.get("/geojson")
 def list_clusters_geojson(
-    predicted_class: Optional[str] = Query(None),
-    min_risk: Optional[float] = Query(None, ge=0, le=100),
+    predicted_class: str | None = Query(None),
+    min_risk: float | None = Query(None, ge=0, le=100),
     db: Session = Depends(get_db),
 ) -> dict:
     stmt = select(DiscoveredCluster)

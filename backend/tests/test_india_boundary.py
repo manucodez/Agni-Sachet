@@ -66,3 +66,39 @@ def test_filter_within_india_fails_open_when_boundary_unavailable(monkeypatch):
     kept, dropped = filter_within_india(records)
     assert dropped == 0
     assert kept == records
+
+
+def test_get_boundary_retries_after_a_failed_load_instead_of_caching_the_failure(monkeypatch):
+    """Regression test for a real bug: a previous version of get_boundary()
+    marked "attempted" as true on the very first call regardless of
+    outcome, so a single transient failure (network hiccup, GitHub rate
+    limit) permanently disabled boundary enforcement for the rest of the
+    process's life — silently, since only the first failure logged a
+    warning. This locks in the fix: only a SUCCESSFUL load is cached;
+    a failed one is retried on the next call."""
+    import app.ingestion.india_boundary as mod
+
+    monkeypatch.setattr(mod.settings, "enforce_india_boundary", True)
+    monkeypatch.setattr(mod, "_singleton", None)
+
+    call_count = {"n": 0}
+
+    def flaky_load():
+        call_count["n"] += 1
+        if call_count["n"] == 1:
+            return None  # first call: simulated network failure
+        return IndiaBoundary.from_geojson_dict(SQUARE_GEOJSON)  # second call: succeeds
+
+    monkeypatch.setattr(mod.IndiaBoundary, "load", staticmethod(flaky_load))
+
+    first = mod.get_boundary()
+    assert first is None
+    assert call_count["n"] == 1
+
+    second = mod.get_boundary()  # must actually retry, not return the cached None
+    assert second is not None
+    assert call_count["n"] == 2
+
+    third = mod.get_boundary()  # a successful load IS cached — no third attempt
+    assert third is second
+    assert call_count["n"] == 2

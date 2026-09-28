@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
@@ -16,6 +16,6 @@ class AlertOut(BaseModel):
     location_lon: float
     description: str
     cluster_ids_involved: list[int]
-    edge_id: Optional[int] = None
+    edge_id: int | None = None
     sachet_payload: dict[str, Any]
     delivered: bool

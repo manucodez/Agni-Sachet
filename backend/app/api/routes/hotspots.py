@@ -6,7 +6,6 @@ GET /hotspots/geojson     -> same filters, as a GeoJSON FeatureCollection
 Example: GET /hotspots?predicted_class=industrial_fire&since=2026-08-01
 """
 from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
@@ -22,9 +21,9 @@ router = APIRouter()
 
 def _apply_filters(
     stmt,
-    predicted_class: Optional[str],
-    since: Optional[datetime],
-    min_frp: Optional[float],
+    predicted_class: str | None,
+    since: datetime | None,
+    min_frp: float | None,
 ):
     if since is not None:
         stmt = stmt.where(Hotspot.acq_datetime >= since)
@@ -39,9 +38,9 @@ def _apply_filters(
 
 @router.get("", response_model=list[HotspotOut])
 def list_hotspots(
-    predicted_class: Optional[str] = Query(None, description="industrial_fire | gas_flare | mining | agricultural_burn | wildfire | other | unclassified"),
-    since: Optional[datetime] = Query(None, description="ISO timestamp lower bound on acq_datetime"),
-    min_frp: Optional[float] = Query(None, description="Minimum Fire Radiative Power (MW)"),
+    predicted_class: str | None = Query(None, description="industrial_fire | gas_flare | mining | agricultural_burn | wildfire | other | unclassified"),
+    since: datetime | None = Query(None, description="ISO timestamp lower bound on acq_datetime"),
+    min_frp: float | None = Query(None, description="Minimum Fire Radiative Power (MW)"),
     limit: int = Query(1000, le=10000),
     db: Session = Depends(get_db),
 ) -> list[Hotspot]:
@@ -52,9 +51,9 @@ def list_hotspots(
 
 @router.get("/geojson")
 def list_hotspots_geojson(
-    predicted_class: Optional[str] = Query(None),
-    since: Optional[datetime] = Query(None),
-    min_frp: Optional[float] = Query(None),
+    predicted_class: str | None = Query(None),
+    since: datetime | None = Query(None),
+    min_frp: float | None = Query(None),
     limit: int = Query(5000, le=20000),
     db: Session = Depends(get_db),
 ) -> dict:

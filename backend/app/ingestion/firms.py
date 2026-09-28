@@ -9,7 +9,7 @@ One request per sensor (the Area API takes a single source per call), so
 """
 import io
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pandas as pd
 import requests
@@ -63,7 +63,7 @@ class FirmsAdapter(IngestionAdapter):
             brightness = row.get("bright_ti4", row.get("brightness"))
             acq_dt = datetime.strptime(
                 f"{row['acq_date']} {int(row['acq_time']):04d}", "%Y-%m-%d %H%M"
-            ).replace(tzinfo=timezone.utc)
+            ).replace(tzinfo=UTC)
 
             records.append(
                 {

@@ -68,7 +68,11 @@ class Hotspot(Base):
     # --- discovery (Step 3) ---
     cluster_id: Mapped[int] = mapped_column(Integer, ForeignKey("discovered_clusters.cluster_id"), nullable=True, index=True)
 
-    cluster: Mapped["DiscoveredCluster"] = relationship(back_populates="hotspots")
+    # "DiscoveredCluster" here is a forward reference to the model in
+    # app/models/cluster.py — see the matching note on that model's
+    # `hotspots` relationship for why this is a false positive, not a
+    # real undefined name.
+    cluster: Mapped["DiscoveredCluster"] = relationship(back_populates="hotspots")  # noqa: F821
 
     def __repr__(self) -> str:  # pragma: no cover
         return f"<Hotspot {self.sensor} {self.acq_datetime} ({self.lat:.3f},{self.lon:.3f})>"

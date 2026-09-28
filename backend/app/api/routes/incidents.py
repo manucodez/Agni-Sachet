@@ -3,7 +3,6 @@ Tiered incident-escalation endpoints. See app/alerts/incident_dispatch.py
 for the state machine these wrap, and app/models/incident.py for why this
 is a separate table/workflow from the existing /alerts feed.
 """
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import HTMLResponse
@@ -26,7 +25,7 @@ router = APIRouter()
 
 @router.get("", response_model=list[IncidentOut])
 def list_incidents(
-    status: Optional[str] = Query(None, description="open | acknowledged | auto_resolved"),
+    status: str | None = Query(None, description="open | acknowledged | auto_resolved"),
     limit: int = Query(100, le=1000),
     db: Session = Depends(get_db),
 ) -> list[Incident]:
@@ -45,7 +44,7 @@ def get_incident(incident_id: str, db: Session = Depends(get_db)) -> Incident:
 
 
 @router.get("/{ack_token}/acknowledge", response_class=HTMLResponse)
-def acknowledge_via_link(ack_token: str, by: Optional[str] = Query(None), db: Session = Depends(get_db)) -> str:
+def acknowledge_via_link(ack_token: str, by: str | None = Query(None), db: Session = Depends(get_db)) -> str:
     """The link embedded in tier-escalation emails (app/alerts/email_channel.py)
     — a plain GET so it works as a one-click link from any mail client,
     which is why this is separate from the JSON POST endpoint below rather

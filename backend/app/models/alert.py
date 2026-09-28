@@ -5,7 +5,6 @@ here in a shape that maps directly onto NDMA SACHET's expected fields.
 """
 import uuid
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import JSON, DateTime, Float, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -27,7 +26,7 @@ class Alert(Base):
     description: Mapped[str] = mapped_column(String, nullable=False)
 
     cluster_ids_involved: Mapped[list[int]] = mapped_column(JSON, nullable=False, default=list)
-    edge_id: Mapped[Optional[int]] = mapped_column(nullable=True)  # set only for correlated events
+    edge_id: Mapped[int | None] = mapped_column(nullable=True)  # set only for correlated events
 
     sachet_payload: Mapped[dict] = mapped_column(JSON, nullable=False)  # the exact outbound payload, for audit
     delivered: Mapped[bool] = mapped_column(default=False)

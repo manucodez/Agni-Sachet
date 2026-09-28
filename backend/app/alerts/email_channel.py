@@ -34,14 +34,14 @@ import logging
 import smtplib
 from dataclasses import dataclass
 from email.mime.text import MIMEText
-from enum import Enum
+from enum import StrEnum
 
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
 
-class DispatchStatus(str, Enum):
+class DispatchStatus(StrEnum):
     SENT = "sent"
     DISABLED = "disabled"  # alert_dispatch_enabled is False
     NOT_CONFIGURED = "not_configured"  # no recipients or no SMTP creds for this tier

@@ -124,7 +124,13 @@ def run_discovery() -> None:
                 )
 
         # --- back-fill hotspot.cluster_id using STABLE ids ---
-        id_to_raw_label = dict(zip(labeled["id"], labeled["cluster_id"]))
+        # strict=True: id_to_raw_label maps every row of `labeled` by
+        # position, and the two columns come from the same DataFrame — if
+        # they were ever different lengths that would mean an upstream
+        # bug (a dropped/misaligned row), and silently zip()-truncating
+        # would mean SOME hotspots quietly get no cluster_id backfilled
+        # at all rather than the mismatch failing loudly here.
+        id_to_raw_label = dict(zip(labeled["id"], labeled["cluster_id"], strict=True))
         for hotspot_row in rows:
             raw_label = id_to_raw_label.get(hotspot_row.id)
             stable_id = raw_to_stable.get(raw_label) if raw_label is not None and raw_label != -1 else None

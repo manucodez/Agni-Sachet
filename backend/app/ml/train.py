@@ -23,7 +23,6 @@ import argparse
 import logging
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import xgboost as xgb
 from sklearn.metrics import classification_report, f1_score

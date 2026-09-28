@@ -47,7 +47,6 @@ from __future__ import annotations
 import logging
 import threading
 from pathlib import Path
-from typing import Optional
 
 import requests
 
@@ -59,8 +58,8 @@ INDIA_BOUNDARY_URL = "https://raw.githubusercontent.com/datameet/maps/master/Cou
 CACHE_PATH = Path("data/raw/india_boundary/india-composite.geojson")
 
 _lock = threading.Lock()
-_singleton: Optional["IndiaBoundary"] = None
-_load_attempted = False
+_singleton: IndiaBoundary | None = None
+_disabled_by_config_logged = False
 
 
 class IndiaBoundary:
@@ -88,7 +87,7 @@ class IndiaBoundary:
         return bool(self._prepared.contains(Point(lon, lat)))
 
     @classmethod
-    def from_geojson_dict(cls, geojson: dict) -> "IndiaBoundary":
+    def from_geojson_dict(cls, geojson: dict) -> IndiaBoundary:
         from shapely.geometry import shape
         from shapely.ops import unary_union
 
@@ -97,7 +96,7 @@ class IndiaBoundary:
         return cls(unary_union(geoms))
 
     @classmethod
-    def load(cls) -> Optional["IndiaBoundary"]:
+    def load(cls) -> IndiaBoundary | None:
         """Downloads (or reads the disk cache of) the boundary polygon.
         Returns None if unavailable — callers must treat that as "fall
         back to bbox-only filtering," never as "nothing is inside India."
@@ -137,18 +136,32 @@ class IndiaBoundary:
             return None
 
 
-def get_boundary() -> Optional[IndiaBoundary]:
+def get_boundary() -> IndiaBoundary | None:
     """Process-wide cached loader — the boundary polygon is a few MB of
     coordinates; parsing it on every ingestion record would be absurd, and
-    it never changes within a run."""
-    global _singleton, _load_attempted
+    it never changes within a run.
+
+    Only a SUCCESSFUL load is cached permanently. A failed load (network
+    hiccup, GitHub rate limit) is retried on the next call rather than
+    sticking forever — this module is designed to run inside a long-lived
+    scheduled process (see this module's docstring, "Designed to run on a
+    schedule"), and caching a transient failure as permanent would mean
+    one bad network moment silently disables sovereign-boundary
+    enforcement for the rest of that process's life, with no further
+    warning after the first one. A previous version of this function did
+    exactly that — see docs/MERGE_NOTES.md if this comment is still here
+    when that's been cleaned up.
+    """
+    global _singleton, _disabled_by_config_logged
     with _lock:
-        if not _load_attempted:
-            _load_attempted = True
-            if settings.enforce_india_boundary:
-                _singleton = IndiaBoundary.load()
-            else:
+        if _singleton is not None:
+            return _singleton
+        if not settings.enforce_india_boundary:
+            if not _disabled_by_config_logged:
                 logger.info("ENFORCE_INDIA_BOUNDARY=false — skipping sovereign-boundary filtering by config.")
+                _disabled_by_config_logged = True
+            return None
+        _singleton = IndiaBoundary.load()
         return _singleton
 
 

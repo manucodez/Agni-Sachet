@@ -30,7 +30,7 @@ from __future__ import annotations
 import json
 import logging
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -60,7 +60,7 @@ def _log_dispatch(incident: Incident, tier: int, channel: str, status: str, reci
     log = json.loads(incident.dispatch_log_json) if incident.dispatch_log_json else []
     log.append({
         "tier": tier, "channel": channel, "status": status,
-        "recipients": recipients, "at": datetime.now(timezone.utc).isoformat(),
+        "recipients": recipients, "at": datetime.now(UTC).isoformat(),
     })
     incident.dispatch_log_json = json.dumps(log)
 
@@ -99,7 +99,7 @@ def trigger_or_escalate_incident(
     Alert). Returns the Incident if one was created or escalated, or None
     if an already-open incident wasn't due for escalation yet.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     incident = _find_open_incident(session, cluster_id)
 
     if incident is None:
@@ -181,6 +181,6 @@ def _apply_acknowledgement(incident: Incident | None, acknowledged_by: str | Non
         return None
     if incident.status == STATUS_OPEN:
         incident.status = STATUS_ACKNOWLEDGED
-        incident.acknowledged_at = datetime.now(timezone.utc)
+        incident.acknowledged_at = datetime.now(UTC)
         incident.acknowledged_by = acknowledged_by or "unspecified"
     return incident

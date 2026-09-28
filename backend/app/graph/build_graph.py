@@ -19,8 +19,6 @@ import networkx as nx
 import pandas as pd
 from shapely.geometry import LineString, Point
 
-from app.ml.features import haversine_km
-
 logger = logging.getLogger(__name__)
 
 INFRA_BUFFER_KM = 2.0  # a cluster within this distance of a pipeline/line is "on" it
@@ -66,13 +64,19 @@ def build_physical_graph(
             line_to_clusters[i] = nearby
 
     edges: list[PhysicalEdge] = []
-    for i, nearby in line_to_clusters.items():
+    for _line_idx, nearby in line_to_clusters.items():
         cluster_ids = [c for c, _ in nearby]
         category = nearby[0][1]
         # connect consecutive clusters along the same corridor, not every
         # pair — avoids an O(n^2) fully-connected clique per line for long
         # transmission corridors with many stations on them
-        for a, b in zip(cluster_ids[:-1], cluster_ids[1:]):
+        #
+        # strict=False is deliberate here, not an oversight: this zips a
+        # list against itself offset by one (cluster_ids[:-1] vs [1:]) to
+        # get consecutive pairs, so the two sides are ALWAYS exactly one
+        # element apart by construction — strict=True would make this
+        # raise on every single call.
+        for a, b in zip(cluster_ids[:-1], cluster_ids[1:], strict=False):
             if a == b:
                 continue
             graph.add_edge(a, b, edge_type="physical", connection_detail=category)

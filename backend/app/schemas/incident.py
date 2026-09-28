@@ -1,6 +1,5 @@
 """API-facing schemas for the tiered incident-escalation workflow."""
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
@@ -18,14 +17,14 @@ class IncidentOut(BaseModel):
     risk_tier: str
     centroid_lat: float
     centroid_lon: float
-    nearest_responder_distance_m: Optional[float] = None
-    nearest_responder_type: Optional[str] = None
-    nearest_responder_name: Optional[str] = None
+    nearest_responder_distance_m: float | None = None
+    nearest_responder_type: str | None = None
+    nearest_responder_name: str | None = None
     current_tier: int
     status: str
-    acknowledged_at: Optional[datetime] = None
-    acknowledged_by: Optional[str] = None
+    acknowledged_at: datetime | None = None
+    acknowledged_by: str | None = None
 
 
 class AcknowledgeRequest(BaseModel):
-    acknowledged_by: Optional[str] = None
+    acknowledged_by: str | None = None

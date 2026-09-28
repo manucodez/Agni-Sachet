@@ -5,7 +5,13 @@ src = ["backend/app", "backend/tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
-ignore = ["E501"]
+# E501: line length — deliberately not enforced (see line-length above).
+# B008: "function call in argument default" — this is FastAPI's own
+# recommended `Depends(...)` dependency-injection pattern, used in every
+# route in app/api/routes/. Flagging it project-wide is the single most
+# common ruff+FastAPI false-positive combination; ignoring it here is
+# standard practice for FastAPI projects, not a suppressed real bug.
+ignore = ["E501", "B008"]
 
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]

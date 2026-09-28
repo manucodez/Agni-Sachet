@@ -7,9 +7,7 @@ names, so adding a new data source means adding one field here, not
 grepping the codebase for os.getenv calls.
 """
 from functools import lru_cache
-from typing import List, Optional
 
-from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -30,7 +28,7 @@ class Settings(BaseSettings):
     postgres_db: str = "agni_sachet"
     postgres_host: str = "localhost"
     postgres_port: int = 5432
-    database_url: Optional[str] = None
+    database_url: str | None = None
 
     # --- FIRMS ---
     firms_map_key: str = ""
@@ -122,7 +120,7 @@ class Settings(BaseSettings):
     smtp_from_address: str = ""
 
     @property
-    def cors_origin_list(self) -> List[str]:
+    def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
     @property
@@ -131,10 +129,10 @@ class Settings(BaseSettings):
         return w, s, e, n
 
     @property
-    def firms_sensor_list(self) -> List[str]:
+    def firms_sensor_list(self) -> list[str]:
         return [s.strip() for s in self.firms_sensors.split(",") if s.strip()]
 
-    def incident_tier_emails(self, tier: int) -> List[str]:
+    def incident_tier_emails(self, tier: int) -> list[str]:
         raw = {0: self.incident_tier0_emails, 1: self.incident_tier1_emails, 2: self.incident_tier2_emails}[tier]
         return [e.strip() for e in raw.split(",") if e.strip()]
 

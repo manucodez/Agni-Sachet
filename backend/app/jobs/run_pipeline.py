@@ -14,16 +14,14 @@ threshold, keeping the expensive calls rare by construction.
 """
 from __future__ import annotations
 
-import json
 import logging
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 import pandas as pd
 from sqlalchemy import select
 
 from app.alerts.incident_dispatch import auto_resolve_if_subsided, trigger_or_escalate_incident
 from app.alerts.sachet import build_sachet_payload, dispatch_alert
-from app.core.config import settings
 from app.core.db import SessionLocal
 from app.graph.build_graph import build_physical_graph, compute_centrality
 from app.graph.wind_edges import find_wind_edges
@@ -233,7 +231,7 @@ def run_pipeline() -> None:
                 delivered = dispatch_alert(payload)
                 session.add(
                     Alert(
-                        id=payload["identifier"], created_at=datetime.now(timezone.utc),
+                        id=payload["identifier"], created_at=datetime.now(UTC),
                         event_type=predicted_class, severity=risk_tier,
                         location_lat=cluster_row["centroid_lat"], location_lon=cluster_row["centroid_lon"],
                         description=payload["info"]["event"], cluster_ids_involved=[int(cluster_id)],
@@ -283,7 +281,6 @@ def _run_advanced_channels(cluster_row: pd.Series, event_date: date) -> tuple[fl
         logger.debug("Sentinel-1 channel unavailable this pass", exc_info=True)
 
     try:
-        from app.ml import novelty as novelty_module
         # A real implementation pulls a Sentinel-2 chip here first; left as
         # a documented gap (see app/ml/novelty.py) since chip download
         # depends on which backend (CDSE/GEE) you've configured.
